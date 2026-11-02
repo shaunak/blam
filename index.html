@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="icon" href="data:,"><title>BLAM</title></head>
+<body>
+<canvas id="arena" aria-label="Multiplayer first person arena"></canvas>
+<div id="damage"></div>
+<header><span class="brand">BLAM<span class="tag">GREYBOX / 01</span></span><span id="connection">OFFLINE</span></header>
+<button id="open-menu" hidden>Menu</button><div id="score">0 <span>:</span> 0</div>
+<div id="crosshair">+</div><div id="hitmarker">×</div><div id="notice" role="status" aria-live="polite"></div>
+<footer><div class="vitals"><div><span>SHIELD</span><strong id="shield">50</strong></div><meter id="shieldbar" min="0" max="50" value="50"></meter><div><span>HEALTH</span><strong id="health">100</strong></div><meter id="healthbar" min="0" max="100" value="100"></meter></div><div class="weapon">01 / RIFLE<small>WASD move · SPACE jump · CLICK fire · ESC release</small></div></footer>
+<section id="menu"><div class="card"><h1>BLAM<span>.</span></h1>
+<button id="start" type="button">Start Game</button><details id="options"><summary>Options</summary><form id="join"><label for="room">Room code</label><input id="room" name="room" required minlength="16" maxlength="64" placeholder="Paste the code from the host" autocomplete="off" spellcheck="false"><label for="signal">Signaling server</label><input id="signal" name="signal" type="url" required spellcheck="false"><label class="relay"><input id="relay" type="checkbox">Force TURN relay</label><p>Relay testing only. Requires a TURN server on the host.</p><button type="submit">Connect manually</button></form></details>
+<div id="share" hidden><h2>Invite a friend</h2><p id="invite-code" hidden></p><p id="players" role="status"></p><label for="invite">Your invite link</label><input id="invite" readonly spellcheck="false"><button id="copy-invite" class="secondary" type="button">Copy invite link</button><p id="share-status" role="status" aria-live="polite">Send this link to a friend. They select Join Game.</p></div><button id="enter" hidden>Enter arena</button><button id="leave" class="secondary" hidden>Leave room</button><button id="retry" hidden>Reconnect</button><p id="status" role="status" aria-live="polite"></p><details id="diagnostics" hidden><summary>Connection details</summary><textarea id="network-details" readonly aria-label="Connection details" rows="5"></textarea><p>Share these details if a connection fails.</p></details><a id="back-menu" href="/" hidden>Main menu</a></div></section>
+<script type="module" src="/src/client.ts"></script>
+</body></html>

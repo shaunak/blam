@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright';
+import { WebSocket } from 'ws';
+import { startSignaling } from '../src/signaling.js';
+const signal = await startSignaling(0);
+const origin = `http://127.0.0.1:${signal.port}`;
+const socketUrl = origin.replace('http:', 'ws:') + '/signal';
+const room = 'connection-test-room';
+const host = new WebSocket(socketUrl);
+await new Promise<void>(resolve => host.once('open', resolve));
+host.send(JSON.stringify({ type: 'host', room }));
+await new Promise<void>(resolve => host.once('message', () => resolve()));
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+try {
+  const page = await browser.newPage();
+  await page.goto(`${origin}/#room=${room}&signal=${encodeURIComponent(socketUrl)}`);
+  await page.clock.install();
+  await page.getByRole('button', { name: 'Join Game' }).click();
+  await page.getByText('Host found. Waiting for connection details…', { exact: true }).waitFor({ timeout: 2000 });
+  await page.clock.fastForward(26000);
+  assert.match(await page.locator('#status').innerText(), /host did not send connection details/i);
+  assert.equal(await page.getByRole('button', { name: 'Reconnect', exact: true }).isVisible(), true);
+  await page.goto(`${origin}/#room=${room}&signal=${encodeURIComponent('ws://localhost:123/#invalid')}`);
+  await page.reload();
+  await page.getByRole('button', { name: 'Join Game' }).click();
+  assert.match(await page.locator('#status').innerText(), /valid.*signaling URL/i);
+  assert.equal(await page.getByRole('button', { name: 'Join Game' }).isEnabled(), true);
+  await page.goto(`${origin}/#room=room-does-not-exist&signal=${encodeURIComponent(socketUrl)}`);
+  await page.reload();
+  await page.getByRole('button', { name: 'Join Game' }).click();
+  await page.getByText(/Session ended or invite expired/).waitFor({ timeout: 2000 });
+  console.log('PASS: stalled host timeout, invalid URL recovery, expired invite error.');
+} finally { await browser.close(); host.close(); await signal.close(); }

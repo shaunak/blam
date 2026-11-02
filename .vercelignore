@@ -1,0 +1,10 @@
+.env
+.env.*
+node_modules
+artifacts
+docs
+tests
+deploy
+dist
+
+logs/
