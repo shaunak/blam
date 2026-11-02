@@ -1,6 +1,32 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { weaponBob, updateWeaponBob } from '../src/weapon';
+import { createRifle, weaponBob, updateWeaponBob } from '../src/weapon';
+import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Scene } from '@babylonjs/core/scene';
+
+test('rifle parts follow recoil, hide together, and emit shots beyond the barrel', () => {
+  const engine = new NullEngine();
+  const scene = new Scene(engine);
+  try {
+    const { gun, muzzle } = createRifle(scene);
+    gun.position.set(.3, -.25, .6);
+    const parts = gun.getChildMeshes().filter(part => part !== muzzle);
+    assert.ok(parts.length > 1, 'rifle has a shaped body');
+    assert.equal(muzzle.isEnabled(), false, 'flash starts hidden');
+    muzzle.computeWorldMatrix(true);
+    for (const part of parts) {
+      part.computeWorldMatrix(true);
+      assert.equal(part.isPickable, false, 'view model cannot intercept aim rays');
+      assert.ok(part.getBoundingInfo().boundingBox.maximumWorld.z < muzzle.getAbsolutePosition().z, 'tracer starts outside the barrel');
+    }
+    const before = muzzle.getAbsolutePosition().z;
+    gun.position.z -= .07;
+    muzzle.computeWorldMatrix(true);
+    assert.ok(Math.abs(muzzle.getAbsolutePosition().z - before + .07) < 1e-6);
+    gun.setEnabled(false);
+    assert.ok(parts.every(part => !part.isEnabled()), 'menu hides the whole rifle');
+  } finally { scene.dispose(); engine.dispose(); }
+});
 
 test('weapon sways along a U-shaped parabola and settles when movement stops', () => {
   const bob = weaponBob();
