@@ -26,6 +26,9 @@ chmod 600 .env.vercel
 ```
 
 Keep the terminal open and the laptop awake. Ctrl+C ends its rooms.
+The host checks its public tunnel every 30 seconds.
+After three failed checks, it replaces the tunnel and publishes the new address.
+It also replaces the tunnel if the tunnel process exits. Reopen the invite if a connection drops during recovery.
 The process publishes its current tunnel address in a private Vercel Blob.
 The Vercel function uses that record to create and find rooms on the laptop.
 It never sends the gateway key or TURN API token to browsers.
